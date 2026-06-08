@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shadow MD - Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #ff006e;
+            --primary-dark: #c70057;
+            --secondary: #8338ec;
+            --accent: #3a86ff;
+            --bg: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-input: #1a1a2e;
+            --text: #ffffff;
+            --text-muted: #8892b0;
+            --border: #2a2a3e;
+            --success: #00f5d4;
+            --danger: #ff4757;
+            --warning: #ffd166;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100vh;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            padding: 24px;
+            z-index: 100;
+        }
+        .logo {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255, 0, 110, 0.1);
+            color: var(--primary);
+        }
+        .main {
+            margin-left: 260px;
+            padding: 32px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+        .header h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary), var(--secondary));
+        }
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+        }
+        .stat-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        .stat-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 0, 110, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+        }
+        .section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .toggle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .toggle-row:last-child {
+            border-bottom: none;
+        }
+        .toggle-info h4 {
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+        .toggle-info p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .toggle {
+            width: 50px;
+            height: 26px;
+            background: var(--bg-input);
+            border-radius: 13px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .toggle.active {
+            background: var(--primary);
+        }
+        .toggle::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+        .toggle.active::after {
+            left: 27px;
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .status-online {
+            background: rgba(0, 245, 212, 0.1);
+            color: var(--success);
+        }
+        .status-offline {
+            background: rgba(255, 71, 87, 0.1);
+            color: var(--danger);
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; height: auto; position: relative; }
+            .main { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <i class="fas fa-skull"></i>
+            SHADOW MD
+        </div>
+        <div class="nav-item active">
+            <i class="fas fa-tachometer-alt"></i>
+            Dashboard
+        </div>
+        <div class="nav-item">
+            <i class="fas fa-robot"></i>
+            Bot Settings
+        </div>
+        <div class="nav-item">
+            <i class="fas fa-users"></i>
+            Users
+        </div>
+        <div class="nav-item">
+            <i class="fas fa-plug"></i>
+            Plugins
+        </div>
+        <div class="nav-item">
+            <i class="fas fa-chart-line"></i>
+            Analytics
+        </div>
+        <div class="nav-item">
+            <i class="fas fa-cog"></i>
+            Settings
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="header">
+            <h1>Dashboard</h1>
+            <div class="status-badge status-online" id="statusBadge">
+                <i class="fas fa-circle" style="font-size: 8px;"></i>
+                Online
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Messages</div>
+                <div class="stat-value" id="msgCount">0</div>
+                <div class="stat-icon"><i class="fas fa-envelope"></i></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Uptime</div>
+                <div class="stat-value" id="uptime">0h</div>
+                <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Active Users</div>
+                <div class="stat-value">1</div>
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Bot Version</div>
+                <div class="stat-value">v3.1</div>
+                <div class="stat-icon"><i class="fas fa-code-branch"></i></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">
+                <i class="fas fa-sliders-h" style="color: var(--primary);"></i>
+                Bot Features
+            </div>
+            <div class="toggle-row">
+                <div class="toggle-info">
+                    <h4>Auto Status View</h4>
+                    <p>Automatically view status updates</p>
+                </div>
+                <div class="toggle active" onclick="toggleFeature(this, 'autostatus')"></div>
+            </div>
+            <div class="toggle-row">
+                <div class="toggle-info">
+                    <h4>Auto Reply</h4>
+                    <p>Send automatic replies to messages</p>
+                </div>
+                <div class="toggle active" onclick="toggleFeature(this, 'autoreply')"></div>
+            </div>
+            <div class="toggle-row">
+                <div class="toggle-info">
+                    <h4>Anti Call</h4>
+                    <p>Automatically reject incoming calls</p>
+                </div>
+                <div class="toggle active" onclick="toggleFeature(this, 'anticalls')"></div>
+            </div>
+            <div class="toggle-row">
+                <div class="toggle-info">
+                    <h4>Auto React</h4>
+                    <p>Auto react to commands</p>
+                </div>
+                <div class="toggle active" onclick="toggleFeature(this, 'autoreact')"></div>
+            </div>
+            <div class="toggle-row">
+                <div class="toggle-info">
+                    <h4>Maintenance Mode</h4>
+                    <p>Disable bot for all except owner</p>
+                </div>
+                <div class="toggle" onclick="toggleFeature(this, 'maintenance')"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">
+                <i class="fas fa-broadcast-tower" style="color: var(--primary);"></i>
+                Auto Channel Follow
+            </div>
+            <p style="color: var(--text-muted); margin-bottom: 16px;">
+                When users connect their WhatsApp, they will automatically follow your channel.
+            </p>
+            <div style="background: var(--bg-input); padding: 16px; border-radius: 12px; font-family: monospace; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
+                https://whatsapp.com/channel/0029Vb6iopUDzgTJuzPCk32V
+            </div>
+            <button class="btn btn-primary">
+                <i class="fas fa-save"></i>
+                Update Channel Link
+            </button>
+        </div>
+
+        <div class="section">
+            <div class="section-title">
+                <i class="fas fa-exclamation-triangle" style="color: var(--danger);"></i>
+                Danger Zone
+            </div>
+            <button class="btn btn-danger" onclick="restartBot()">
+                <i class="fas fa-redo"></i>
+                Restart Bot
+            </button>
+        </div>
+    </div>
+
+    <script>
+        async function updateStats() {
+            try {
+                const res = await fetch('/api/status');
+                const data = await res.json();
+                document.getElementById('msgCount').textContent = data.messages || 0;
+                const hours = Math.floor((data.uptime || 0) / 3600000);
+                document.getElementById('uptime').textContent = hours + 'h';
+
+                const badge = document.getElementById('statusBadge');
+                if (data.status === 'connected') {
+                    badge.className = 'status-badge status-online';
+                    badge.innerHTML = '<i class="fas fa-circle" style="font-size: 8px;"></i> Online';
+                } else {
+                    badge.className = 'status-badge status-offline';
+                    badge.innerHTML = '<i class="fas fa-circle" style="font-size: 8px;"></i> Offline';
+                }
+            } catch (e) {}
+        }
+
+        function toggleFeature(el, feature) {
+            el.classList.toggle('active');
+            const enabled = el.classList.contains('active');
+
+            fetch('/api/admin/' + feature, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ enabled })
+            });
+        }
+
+        function restartBot() {
+            if (confirm('Are you sure you want to restart the bot?')) {
+                fetch('/api/admin/restart', { method: 'POST' })
+                    .then(() => alert('Bot restarting...'));
+            }
+        }
+
+        setInterval(updateStats, 5000);
+        updateStats();
+    </script>
+</body>
+</html>

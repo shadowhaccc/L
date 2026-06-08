@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shadow MD - Connect Your WhatsApp</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #ff006e;
+            --primary-dark: #c70057;
+            --secondary: #8338ec;
+            --accent: #3a86ff;
+            --bg: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-input: #1a1a2e;
+            --text: #ffffff;
+            --text-muted: #8892b0;
+            --border: #2a2a3e;
+            --success: #00f5d4;
+            --danger: #ff4757;
+            --warning: #ffd166;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(255, 0, 110, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(131, 56, 236, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(58, 134, 255, 0.05) 0%, transparent 70%);
+            animation: bgFloat 20s ease-in-out infinite;
+        }
+
+        @keyframes bgFloat {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(1deg); }
+            66% { transform: translate(-20px, 20px) rotate(-1deg); }
+        }
+
+        /* Floating Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 15s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.3; }
+            90% { opacity: 0.3; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* Main Container */
+        .container {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Logo Section */
+        .logo-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+
+        .logo-icon svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 20px rgba(255, 0, 110, 0.5));
+        }
+
+        .logo-icon::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(255, 0, 110, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+        }
+
+        .logo-text {
+            font-family: 'Orbitron', monospace;
+            font-size: 2.5rem;
+            font-weight: 900;
+            letter-spacing: 4px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(255, 0, 110, 0.3);
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 10px rgba(255, 0, 110, 0.5)); }
+            to { filter: drop-shadow(0 0 30px rgba(255, 0, 110, 0.8)); }
+        }
+
+        .logo-subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 8px;
+            letter-spacing: 2px;
+        }
+
+        /* Card */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+            backdrop-filter: blur(20px);
+            box-shadow: 
+                0 0 40px rgba(255, 0, 110, 0.1),
+                0 0 80px rgba(131, 56, 236, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary), var(--secondary), transparent);
+        }
+
+        .step-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .card-desc {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 28px;
+        }
+
+        /* Input Group */
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 0 16px;
+            transition: all 0.3s ease;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(255, 0, 110, 0.2);
+        }
+
+        .country-code {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 1rem;
+            padding-right: 8px;
+            border-right: 1px solid var(--border);
+            margin-right: 12px;
+        }
+
+        .phone-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text);
+            font-size: 1.1rem;
+            padding: 16px 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .phone-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Button */
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 16px;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 20px rgba(255, 0, 110, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 0, 110, 0.6);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-shine {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover .btn-shine {
+            left: 100%;
+        }
+
+        /* Loading */
+        .loading {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            padding: 40px 0;
+        }
+
+        .loading.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Result */
+        .result {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            padding: 20px 0;
+        }
+
+        .result.active {
+            display: flex;
+        }
+
+        .code-display {
+            background: var(--bg-input);
+            border: 2px solid var(--primary);
+            border-radius: 16px;
+            padding: 24px 40px;
+            font-family: 'Orbitron', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 8px;
+            color: var(--primary);
+            text-shadow: 0 0 20px rgba(255, 0, 110, 0.5);
+            position: relative;
+        }
+
+        .code-display::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .copy-btn {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 12px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
+            border-color: var(--primary);
+            background: rgba(255, 0, 110, 0.1);
+        }
+
+        .copy-btn.copied {
+            background: var(--success);
+            color: var(--bg);
+            border-color: var(--success);
+        }
+
+        /* Error */
+        .error {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 0;
+        }
+
+        .error.active {
+            display: flex;
+        }
+
+        .error-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 71, 87, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--danger);
+        }
+
+        .error-text {
+            color: var(--danger);
+            font-weight: 500;
+        }
+
+        /* Success */
+        .success {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 0;
+        }
+
+        .success.active {
+            display: flex;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(0, 245, 212, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: var(--success);
+            animation: successPop 0.5s ease;
+        }
+
+        @keyframes successPop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .footer-version {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .footer-version i {
+            color: var(--primary);
+        }
+
+        .admin-link {
+            margin-top: 12px;
+            color: var(--primary);
+            font-size: 0.8rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+
+        .admin-link:hover {
+            opacity: 1;
+        }
+
+        /* Instructions */
+        .instructions {
+            margin-top: 20px;
+            padding: 16px;
+            background: rgba(255, 0, 110, 0.05);
+            border: 1px solid rgba(255, 0, 110, 0.2);
+            border-radius: 12px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .instructions strong {
+            color: var(--primary);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 16px 24px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .toast-success .toast-icon {
+            background: rgba(0, 245, 212, 0.1);
+            color: var(--success);
+        }
+
+        .toast-error .toast-icon {
+            background: rgba(255, 71, 87, 0.1);
+            color: var(--danger);
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .logo-text {
+                font-size: 1.8rem;
+            }
+            .card {
+                padding: 28px 20px;
+            }
+            .code-display {
+                font-size: 1.5rem;
+                padding: 18px 28px;
+            }
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    <div class="particles" id="particles"></div>
+
+    <div class="container">
+        <div class="logo-section">
+            <div class="logo-icon">
+                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="45" stroke="#ff006e" stroke-width="2" fill="none"/>
+                    <circle cx="50" cy="50" r="35" stroke="#8338ec" stroke-width="1.5" fill="none" opacity="0.5"/>
+                    <path d="M35 40 Q50 30 65 40 Q65 55 50 65 Q35 55 35 40" fill="#ff006e"/>
+                    <circle cx="42" cy="45" r="4" fill="#0a0a0f"/>
+                    <circle cx="58" cy="45" r="4" fill="#0a0a0f"/>
+                    <path d="M45 55 Q50 60 55 55" stroke="#0a0a0f" stroke-width="2" fill="none"/>
+                </svg>
+            </div>
+            <h1 class="logo-text">SHADOW MD</h1>
+            <p class="logo-subtitle">Connect Your WhatsApp</p>
+        </div>
+
+        <div class="card fade-in">
+            <!-- Step 1: Input -->
+            <div id="step-input">
+                <div class="step-badge">
+                    <i class="fas fa-shield-alt"></i>
+                    STEP 1
+                </div>
+                <h2 class="card-title">Enter Your WhatsApp Number</h2>
+                <p class="card-desc">Include country code without + or spaces</p>
+
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <span class="country-code">+</span>
+                        <input type="tel" class="phone-input" id="phoneInput" placeholder="923001234567" maxlength="15">
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" id="requestBtn" onclick="requestPairingCode()">
+                    <span class="btn-shine"></span>
+                    <i class="fas fa-paper-plane"></i>
+                    REQUEST PAIRING CODE
+                </button>
+
+                <p style="text-align: center; margin-top: 16px; font-size: 0.75rem; color: var(--text-muted);">
+                    Example: <span style="color: var(--primary);">923001234567</span> (Pakistan)
+                </p>
+            </div>
+
+            <!-- Loading -->
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p class="loading-text">Generating pairing code...</p>
+            </div>
+
+            <!-- Result -->
+            <div class="result" id="result">
+                <div class="success-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h3 style="font-family: 'Orbitron'; font-size: 1.1rem;">Your Pairing Code</h3>
+                <div class="code-display" id="codeDisplay">--------</div>
+                <button class="copy-btn" id="copyBtn" onclick="copyCode()">
+                    <i class="fas fa-copy"></i>
+                    <span>Copy Code</span>
+                </button>
+                <div class="instructions">
+                    <strong>How to use:</strong><br>
+                    1. Open WhatsApp on your phone<br>
+                    2. Go to Settings → Linked Devices<br>
+                    3. Tap "Link a Device"<br>
+                    4. Enter the code above<br>
+                    5. Wait for connection
+                </div>
+            </div>
+
+            <!-- Error -->
+            <div class="error" id="error">
+                <div class="error-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h3 style="font-family: 'Orbitron'; color: var(--danger);">Failed</h3>
+                <p class="error-text" id="errorText">Connection Closed</p>
+                <button class="btn btn-primary" onclick="resetForm()">
+                    <i class="fas fa-redo"></i>
+                    TRY AGAIN
+                </button>
+            </div>
+
+            <!-- Success Connected -->
+            <div class="success" id="success">
+                <div class="success-icon">
+                    <i class="fas fa-check-double"></i>
+                </div>
+                <h3 style="font-family: 'Orbitron'; color: var(--success);">Connected!</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Your WhatsApp is now linked to Shadow MD</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-version">
+                <i class="fas fa-skull"></i>
+                Shadow MD Bot v3.1
+            </div>
+            <a href="#" class="admin-link" onclick="showAdminLogin()">
+                <i class="fas fa-lock"></i>
+                Admin Login
+            </a>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <div class="toast-icon">
+            <i class="fas fa-check"></i>
+        </div>
+        <div class="toast-message">Copied to clipboard!</div>
+    </div>
+
+    <script>
+        // Generate particles
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 20; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 15 + 's';
+            particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+            particlesContainer.appendChild(particle);
+        }
+
+        let currentCode = '';
+
+        async function requestPairingCode() {
+            const phone = document.getElementById('phoneInput').value.trim();
+
+            if (!phone || phone.length < 10) {
+                showToast('Please enter a valid phone number', 'error');
+                return;
+            }
+
+            document.getElementById('step-input').style.display = 'none';
+            document.getElementById('loading').classList.add('active');
+
+            try {
+                const response = await fetch('/api/pair-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: phone })
+                });
+
+                const data = await response.json();
+
+                document.getElementById('loading').classList.remove('active');
+
+                if (data.success && data.code) {
+                    currentCode = data.code;
+                    document.getElementById('codeDisplay').textContent = data.code;
+                    document.getElementById('result').classList.add('active');
+                    showToast('Pairing code generated!', 'success');
+
+                    // Auto check connection
+                    checkConnection();
+                } else {
+                    throw new Error(data.error || 'Failed to generate code');
+                }
+            } catch (err) {
+                document.getElementById('loading').classList.remove('active');
+                document.getElementById('errorText').textContent = err.message || 'Connection Closed';
+                document.getElementById('error').classList.add('active');
+                showToast('Failed to generate code', 'error');
+            }
+        }
+
+        function copyCode() {
+            if (!currentCode) return;
+            navigator.clipboard.writeText(currentCode).then(() => {
+                const btn = document.getElementById('copyBtn');
+                btn.classList.add('copied');
+                btn.innerHTML = '<i class="fas fa-check"></i><span>Copied!</span>';
+                showToast('Code copied to clipboard!', 'success');
+
+                setTimeout(() => {
+                    btn.classList.remove('copied');
+                    btn.innerHTML = '<i class="fas fa-copy"></i><span>Copy Code</span>';
+                }, 2000);
+            });
+        }
+
+        function resetForm() {
+            document.getElementById('error').classList.remove('active');
+            document.getElementById('result').classList.remove('active');
+            document.getElementById('success').classList.remove('active');
+            document.getElementById('step-input').style.display = 'block';
+            document.getElementById('phoneInput').value = '';
+        }
+
+        function checkConnection() {
+            const interval = setInterval(async () => {
+                try {
+                    const res = await fetch('/api/status');
+                    const data = await res.json();
+
+                    if (data.status === 'connected') {
+                        clearInterval(interval);
+                        document.getElementById('result').classList.remove('active');
+                        document.getElementById('success').classList.add('active');
+                        showToast('WhatsApp connected successfully!', 'success');
+                    }
+                } catch (e) {}
+            }, 3000);
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.className = 'toast toast-' + type;
+            toast.querySelector('.toast-message').textContent = message;
+            toast.querySelector('.toast-icon i').className = type === 'success' ? 'fas fa-check' : 'fas fa-exclamation-circle';
+
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function showAdminLogin() {
+            const password = prompt('Enter admin password:');
+            if (!password) return;
+
+            fetch('/api/admin/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Admin login successful!', 'success');
+                    // Redirect to admin panel
+                    window.location.href = '/admin.html';
+                } else {
+                    showToast('Invalid password!', 'error');
+                }
+            });
+        }
+
+        // Enter key support
+        document.getElementById('phoneInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') requestPairingCode();
+        });
+    </script>
+</body>
+</html>
